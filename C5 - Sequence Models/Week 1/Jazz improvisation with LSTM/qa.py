@@ -24,10 +24,7 @@ def __roundUp(num, mult):
 ''' Helper function that, based on if upDown < 0 or upDown >= 0, rounds number 
     down or up respectively to nearest multiple of mult. '''
 def __roundUpDown(num, mult, upDown):
-    if upDown < 0:
-        return __roundDown(num, mult)
-    else:
-        return __roundUp(num, mult)
+    return __roundDown(num, mult) if upDown < 0 else __roundUp(num, mult)
 
 ''' Helper function, from recipes, to iterate over list in chunks of n 
     length. '''
@@ -54,11 +51,14 @@ def prune_grammar(curr_grammar):
 ''' Remove repeated notes, and notes that are too close together. '''
 def prune_notes(curr_notes):
     for n1, n2 in __grouper(curr_notes, n=2):
-        if n2 == None: # corner case: odd-length list
+        if n2 is None: # corner case: odd-length list
             continue
-        if isinstance(n1, note.Note) and isinstance(n2, note.Note):
-            if n1.nameWithOctave == n2.nameWithOctave:
-                curr_notes.remove(n2)
+        if (
+            isinstance(n1, note.Note)
+            and isinstance(n2, note.Note)
+            and n1.nameWithOctave == n2.nameWithOctave
+        ):
+            curr_notes.remove(n2)
 
     return curr_notes
 
@@ -71,10 +71,11 @@ def clean_up_notes(curr_notes):
             m.quarterLength = 0.250
         # QA2: ensure no two melody notes have same offset, i.e. form a chord.
         # Sorted, so same offset would be consecutive notes.
-        if (ix < (len(curr_notes) - 1)):
-            if (m.offset == curr_notes[ix + 1].offset and
-                isinstance(curr_notes[ix + 1], note.Note)):
-                removeIxs.append((ix + 1))
+        if (ix < (len(curr_notes) - 1)) and (
+            m.offset == curr_notes[ix + 1].offset
+            and isinstance(curr_notes[ix + 1], note.Note)
+        ):
+            removeIxs.append((ix + 1))
     curr_notes = [i for ix, i in enumerate(curr_notes) if ix not in removeIxs]
 
     return curr_notes

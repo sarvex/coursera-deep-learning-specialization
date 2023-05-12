@@ -81,7 +81,7 @@ def sequence_to_matrix(sequence, values_indices):
     sequence_len = len(sequence)
     x = np.zeros((1, sequence_len, len(values_indices)))
     for t, value in enumerate(sequence):
-        if (not value in values_indices): print(value)
+        if value not in values_indices: print(value)
         x[0, t, values_indices[value]] = 1.
     return x
 

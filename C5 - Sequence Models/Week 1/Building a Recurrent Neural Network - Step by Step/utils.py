@@ -36,10 +36,8 @@ def initialize_parameters(n_a, n_x, n_y):
     Wya = np.random.randn(n_y, n_a)*0.01 # hidden to output
     b = np.zeros((n_a, 1)) # hidden bias
     by = np.zeros((n_y, 1)) # output bias
-    
-    parameters = {"Wax": Wax, "Waa": Waa, "Wya": Wya, "b": b,"by": by}
-    
-    return parameters
+
+    return {"Wax": Wax, "Waa": Waa, "Wya": Wya, "b": b,"by": by}
 
 def rnn_step_forward(parameters, a_prev, x):
     

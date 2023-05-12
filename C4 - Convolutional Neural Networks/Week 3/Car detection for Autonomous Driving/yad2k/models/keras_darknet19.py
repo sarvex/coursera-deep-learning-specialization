@@ -17,15 +17,13 @@ _DarknetConv2D = partial(Conv2D, padding='same')
 @functools.wraps(Conv2D)
 def DarknetConv2D(*args, **kwargs):
     """Wrapper to set Darknet weight regularizer for Convolution2D."""
-    darknet_conv_kwargs = {'kernel_regularizer': l2(5e-4)}
-    darknet_conv_kwargs.update(kwargs)
+    darknet_conv_kwargs = {'kernel_regularizer': l2(5e-4)} | kwargs
     return _DarknetConv2D(*args, **darknet_conv_kwargs)
 
 
 def DarknetConv2D_BN_Leaky(*args, **kwargs):
     """Darknet Convolution2D followed by BatchNormalization and LeakyReLU."""
-    no_bias_kwargs = {'use_bias': False}
-    no_bias_kwargs.update(kwargs)
+    no_bias_kwargs = {'use_bias': False} | kwargs
     return compose(
         DarknetConv2D(*args, **no_bias_kwargs),
         BatchNormalization(),

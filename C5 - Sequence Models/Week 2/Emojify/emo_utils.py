@@ -100,12 +100,12 @@ def predict(X, Y, W, b, word_to_vec_map):
     """
     m = X.shape[0]
     pred = np.zeros((m, 1))
-    
+
     for j in range(m):                       # Loop over training examples
-        
+
         # Split jth test example (sentence) into list of lower case words
         words = X[j].lower().split()
-        
+
         # Average words' vectors
         avg = np.zeros((50,))
         for w in words:
@@ -116,7 +116,7 @@ def predict(X, Y, W, b, word_to_vec_map):
         Z = np.dot(W, avg) + b
         A = softmax(Z)
         pred[j] = np.argmax(A)
-        
-    print("Accuracy: "  + str(np.mean((pred[:] == Y.reshape(Y.shape[0],1)[:]))))
-    
+
+    print(f"Accuracy: {str(np.mean(pred[:] == Y.reshape(Y.shape[0], 1)[:]))}")
+
     return pred

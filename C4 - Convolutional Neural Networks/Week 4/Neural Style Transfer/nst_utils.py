@@ -79,7 +79,7 @@ def load_vgg_model(path):
     vgg = scipy.io.loadmat(path)
 
     vgg_layers = vgg['layers']
-    
+
     def _weights(layer, expected_layer_name):
         """
         Return the weights and bias from the VGG model for a given layer.
@@ -89,8 +89,6 @@ def load_vgg_model(path):
         b = wb[0][1]
         layer_name = vgg_layers[0][layer][0][0][0][0]
         assert layer_name == expected_layer_name
-        return W, b
-
         return W, b
 
     def _relu(conv2d_layer):
@@ -124,6 +122,8 @@ def load_vgg_model(path):
         return tf.nn.avg_pool(prev_layer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     # Constructs the graph model.
+
+    # Constructs the graph model.
     graph = {}
     graph['input']   = tf.Variable(np.zeros((1, CONFIG.IMAGE_HEIGHT, CONFIG.IMAGE_WIDTH, CONFIG.COLOR_CHANNELS)), dtype = 'float32')
     graph['conv1_1']  = _conv2d_relu(graph['input'], 0, 'conv1_1')
@@ -147,7 +147,7 @@ def load_vgg_model(path):
     graph['conv5_3']  = _conv2d_relu(graph['conv5_2'], 32, 'conv5_3')
     graph['conv5_4']  = _conv2d_relu(graph['conv5_3'], 34, 'conv5_4')
     graph['avgpool5'] = _avgpool(graph['conv5_4'])
-    
+
     return graph
 
 def generate_noise_image(content_image, noise_ratio = CONFIG.NOISE_RATIO):
@@ -157,11 +157,8 @@ def generate_noise_image(content_image, noise_ratio = CONFIG.NOISE_RATIO):
     
     # Generate a random noise_image
     noise_image = np.random.uniform(-20, 20, (1, CONFIG.IMAGE_HEIGHT, CONFIG.IMAGE_WIDTH, CONFIG.COLOR_CHANNELS)).astype('float32')
-    
-    # Set the input_image to be a weighted average of the content_image and a noise_image
-    input_image = noise_image * noise_ratio + content_image * (1 - noise_ratio)
-    
-    return input_image
+
+    return noise_image * noise_ratio + content_image * (1 - noise_ratio)
 
 
 def reshape_and_normalize_image(image):

@@ -78,11 +78,8 @@ def __parse_midi(data_fn):
     melody_stream = solo_stream[-1]
     measures = OrderedDict()
     offsetTuples = [(int(n.offset / 4), n) for n in melody_stream]
-    measureNum = 0 # for now, don't use real m. nums (119, 120)
-    for key_x, group in groupby(offsetTuples, lambda x: x[0]):
+    for measureNum, (key_x, group) in enumerate(groupby(offsetTuples, lambda x: x[0])):
         measures[measureNum] = [n[1] for n in group]
-        measureNum += 1
-
     # Get the stream of chords.
     # offsetTuples_chords: group chords by measure number.
     chordStream = solo_stream[0]
@@ -94,11 +91,8 @@ def __parse_midi(data_fn):
     # the only instrument that has chords. 
     # Group into 4s, just like before. 
     chords = OrderedDict()
-    measureNum = 0
-    for key_x, group in groupby(offsetTuples_chords, lambda x: x[0]):
+    for measureNum, (key_x, group) in enumerate(groupby(offsetTuples_chords, lambda x: x[0])):
         chords[measureNum] = [n[1] for n in group]
-        measureNum += 1
-
     # Fix for the below problem.
     #   1) Find out why len(measures) != len(chords).
     #   ANSWER: resolves at end but melody ends 1/16 before last measure so doesn't
@@ -141,8 +135,8 @@ def get_musical_data(data_fn):
 def get_corpus_data(abstract_grammars):
     corpus = [x for sublist in abstract_grammars for x in sublist.split(' ')]
     values = set(corpus)
-    val_indices = dict((v, i) for i, v in enumerate(values))
-    indices_val = dict((i, v) for i, v in enumerate(values))
+    val_indices = {v: i for i, v in enumerate(values)}
+    indices_val = dict(enumerate(values))
 
     return corpus, values, val_indices, indices_val
 

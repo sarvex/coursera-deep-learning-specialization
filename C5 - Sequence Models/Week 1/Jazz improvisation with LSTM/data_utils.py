@@ -39,42 +39,42 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
     
     # set up audio stream
     out_stream = stream.Stream()
-    
+
     # Initialize chord variables
     curr_offset = 0.0                                     # variable used to write sounds to the Stream.
-    num_chords = int(len(chords) / 3)                     # number of different set of chords
-    
+    num_chords = len(chords) // 3
+
     print("Predicting new values for different set of chords.")
     # Loop over all 18 set of chords. At each iteration generate a sequence of tones
-    # and use the current chords to convert it into actual sounds 
+    # and use the current chords to convert it into actual sounds
     for i in range(1, num_chords):
         
         # Retrieve current chord from stream
         curr_chords = stream.Voice()
-        
+
         # Loop over the chords of the current set of chords
         for j in chords[i]:
             # Add chord to the current chords with the adequate offset, no need to understand this
             curr_chords.insert((j.offset % 4), j)
-        
+
         # Generate a sequence of tones using the model
         _, indices = predict_and_sample(inference_model)
         indices = list(indices.squeeze())
         pred = [indices_tones[p] for p in indices]
-        
+
         predicted_tones = 'C,0.25 '
         for k in range(len(pred) - 1):
-            predicted_tones += pred[k] + ' ' 
-        
+            predicted_tones += f'{pred[k]} ' 
+
         predicted_tones +=  pred[-1]
-                
+
         #### POST PROCESSING OF THE PREDICTED TONES ####
         # We will consider "A" and "X" as "C" tones. It is a common choice.
         predicted_tones = predicted_tones.replace(' A',' C').replace(' X',' C')
 
         # Pruning #1: smoothing measure
         predicted_tones = prune_grammar(predicted_tones)
-        
+
         # Use predicted tones and current chords to generate sounds
         sounds = unparse_grammar(predicted_tones, curr_chords)
 
@@ -85,8 +85,10 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
         sounds = clean_up_notes(sounds)
 
         # Print number of tones/notes in sounds
-        print('Generated %s sounds using the predicted values for the set of chords ("%s") and after pruning' % (len([k for k in sounds if isinstance(k, note.Note)]), i))
-        
+        print(
+            f'Generated {len([k for k in sounds if isinstance(k, note.Note)])} sounds using the predicted values for the set of chords ("{i}") and after pruning'
+        )
+
         # Insert sounds into the output stream
         for m in sounds:
             out_stream.insert(curr_offset + m.offset, m)
@@ -94,7 +96,7 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
             out_stream.insert(curr_offset + mc.offset, mc)
 
         curr_offset += 4.0
-        
+
     # Initialize tempo of the output stream with 130 bit per minute
     out_stream.insert(0.0, tempo.MetronomeMark(number=130))
 
@@ -104,11 +106,11 @@ def generate_music(inference_model, corpus = corpus, abstract_grammars = abstrac
     mf.write()
     print("Your generated music is saved in output/my_music.midi")
     mf.close()
-    
+
     # Play the final stream through output (see 'play' lambda function above)
     # play = lambda x: midi.realtime.StreamPlayer(x).play()
     # play(out_stream)
-    
+
     return out_stream
 
 

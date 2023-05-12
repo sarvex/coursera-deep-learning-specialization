@@ -16,8 +16,7 @@ def sigmoid(x):
     Return:
     s -- sigmoid(x)
     """
-    s = 1/(1+np.exp(-x))
-    return s
+    return 1/(1+np.exp(-x))
 
 def relu(x):
     """
@@ -29,16 +28,14 @@ def relu(x):
     Return:
     s -- relu(x)
     """
-    s = np.maximum(0,x)
-    
-    return s
+    return np.maximum(0,x)
 
 def load_planar_dataset(seed):
     
     np.random.seed(seed)
-    
+
     m = 400 # number of examples
-    N = int(m/2) # number of points per class
+    N = m // 2
     D = 2 # dimensionality
     X = np.zeros((m,D)) # data matrix where each row is a single example
     Y = np.zeros((m,1), dtype='uint8') # labels vector (0 for red, 1 for blue)
@@ -50,7 +47,7 @@ def load_planar_dataset(seed):
         r = a*np.sin(4*t) + np.random.randn(N)*0.2 # radius
         X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
         Y[ix] = j
-        
+
     X = X.T
     Y = Y.T
 
@@ -79,13 +76,15 @@ def initialize_parameters(layer_dims):
     L = len(layer_dims) # number of layers in the network
 
     for l in range(1, L):
-        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1])
-        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
-        
-        assert(parameters['W' + str(l)].shape == (layer_dims[l], layer_dims[l-1]))
-        assert(parameters['b' + str(l)].shape == (layer_dims[l], 1))
+        parameters[f'W{str(l)}'] = np.random.randn(
+            layer_dims[l], layer_dims[l - 1]
+        ) / np.sqrt(layer_dims[l - 1])
+        parameters[f'b{str(l)}'] = np.zeros((layer_dims[l], 1))
 
-        
+        assert parameters[f'W{str(l)}'].shape == (layer_dims[l], layer_dims[l-1])
+        assert parameters[f'b{str(l)}'].shape == (layer_dims[l], 1)
+
+
     return parameters
 
 def forward_propagation(X, parameters):
@@ -140,26 +139,34 @@ def backward_propagation(X, Y, cache):
     """
     m = X.shape[1]
     (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3) = cache
-    
+
     dZ3 = A3 - Y
     dW3 = 1./m * np.dot(dZ3, A2.T)
     db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
-    
+
     dA2 = np.dot(W3.T, dZ3)
     dZ2 = np.multiply(dA2, np.int64(A2 > 0))
     dW2 = 1./m * np.dot(dZ2, A1.T)
     db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
-    
+
     dA1 = np.dot(W2.T, dZ2)
     dZ1 = np.multiply(dA1, np.int64(A1 > 0))
     dW1 = 1./m * np.dot(dZ1, X.T)
     db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
-    
-    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,
-                 "dA2": dA2, "dZ2": dZ2, "dW2": dW2, "db2": db2,
-                 "dA1": dA1, "dZ1": dZ1, "dW1": dW1, "db1": db1}
-    
-    return gradients
+
+    return {
+        "dZ3": dZ3,
+        "dW3": dW3,
+        "db3": db3,
+        "dA2": dA2,
+        "dZ2": dZ2,
+        "dW2": dW2,
+        "db2": db2,
+        "dA1": dA1,
+        "dZ1": dZ1,
+        "dW1": dW1,
+        "db1": db1,
+    }
 
 def update_parameters(parameters, grads, learning_rate):
     """
@@ -182,9 +189,15 @@ def update_parameters(parameters, grads, learning_rate):
 
     # Update rule for each parameter
     for k in range(n):
-        parameters["W" + str(k+1)] = parameters["W" + str(k+1)] - learning_rate * grads["dW" + str(k+1)]
-        parameters["b" + str(k+1)] = parameters["b" + str(k+1)] - learning_rate * grads["db" + str(k+1)]
-        
+        parameters[f"W{str(k + 1)}"] = (
+            parameters[f"W{str(k + 1)}"]
+            - learning_rate * grads[f"dW{str(k + 1)}"]
+        )
+        parameters[f"b{str(k + 1)}"] = (
+            parameters[f"b{str(k + 1)}"]
+            - learning_rate * grads[f"db{str(k + 1)}"]
+        )
+
     return parameters
 
 def predict(X, y, parameters):
@@ -201,23 +214,19 @@ def predict(X, y, parameters):
     
     m = X.shape[1]
     p = np.zeros((1,m), dtype = np.int)
-    
+
     # Forward propagation
     a3, caches = forward_propagation(X, parameters)
-    
+
     # convert probas to 0/1 predictions
     for i in range(0, a3.shape[1]):
-        if a3[0,i] > 0.5:
-            p[0,i] = 1
-        else:
-            p[0,i] = 0
-
+        p[0,i] = 1 if a3[0,i] > 0.5 else 0
     # print results
 
     #print ("predictions: " + str(p[0,:]))
     #print ("true labels: " + str(y[0,:]))
-    print("Accuracy: "  + str(np.mean((p[0,:] == y[0,:]))))
-    
+    print(f"Accuracy: {str(np.mean(p[0, :] == y[0, :]))}")
+
     return p
 
 def compute_cost(a3, Y):
@@ -232,11 +241,9 @@ def compute_cost(a3, Y):
     cost - value of the cost function
     """
     m = Y.shape[1]
-    
+
     logprobs = np.multiply(-np.log(a3),Y) + np.multiply(-np.log(1 - a3), 1 - Y)
-    cost = 1./m * np.nansum(logprobs)
-    
-    return cost
+    return 1./m * np.nansum(logprobs)
 
 def load_dataset():
     train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
@@ -275,22 +282,21 @@ def predict_dec(parameters, X):
     
     # Predict using forward propagation and a classification threshold of 0.5
     a3, cache = forward_propagation(X, parameters)
-    predictions = (a3>0.5)
-    return predictions
+    return (a3>0.5)
 
 def load_planar_dataset(randomness, seed):
     
     np.random.seed(seed)
-    
+
     m = 50
-    N = int(m/2) # number of points per class
+    N = m // 2
     D = 2 # dimensionality
     X = np.zeros((m,D)) # data matrix where each row is a single example
     Y = np.zeros((m,1), dtype='uint8') # labels vector (0 for red, 1 for blue)
     a = 2 # maximum ray of the flower
 
     for j in range(2):
-        
+
         ix = range(N*j,N*(j+1))
         if j == 0:
             t = np.linspace(j, 4*3.1415*(j+1),N) #+ np.random.randn(N)*randomness # theta
@@ -298,10 +304,10 @@ def load_planar_dataset(randomness, seed):
         if j == 1:
             t = np.linspace(j, 2*3.1415*(j+1),N) #+ np.random.randn(N)*randomness # theta
             r = 0.2*np.square(t) + np.random.randn(N)*randomness # radius
-            
+
         X[ix] = np.c_[r*np.cos(t), r*np.sin(t)]
         Y[ix] = j
-        
+
     X = X.T
     Y = Y.T
 

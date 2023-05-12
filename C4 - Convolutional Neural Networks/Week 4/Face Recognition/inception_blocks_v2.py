@@ -22,7 +22,7 @@ def inception_block_1a(X):
     X_3x3 = Conv2D(128, (3, 3), data_format='channels_first', name='inception_3a_3x3_conv2')(X_3x3)
     X_3x3 = BatchNormalization(axis=1, epsilon=0.00001, name='inception_3a_3x3_bn2')(X_3x3)
     X_3x3 = Activation('relu')(X_3x3)
-    
+
     X_5x5 = Conv2D(16, (1, 1), data_format='channels_first', name='inception_3a_5x5_conv1')(X)
     X_5x5 = BatchNormalization(axis=1, epsilon=0.00001, name='inception_3a_5x5_bn1')(X_5x5)
     X_5x5 = Activation('relu')(X_5x5)
@@ -40,11 +40,8 @@ def inception_block_1a(X):
     X_1x1 = Conv2D(64, (1, 1), data_format='channels_first', name='inception_3a_1x1_conv')(X)
     X_1x1 = BatchNormalization(axis=1, epsilon=0.00001, name='inception_3a_1x1_bn')(X_1x1)
     X_1x1 = Activation('relu')(X_1x1)
-        
-    # CONCAT
-    inception = concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
 
-    return inception
+    return concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
 
 def inception_block_1b(X):
     X_3x3 = Conv2D(96, (1, 1), data_format='channels_first', name='inception_3b_3x3_conv1')(X)
@@ -73,9 +70,7 @@ def inception_block_1b(X):
     X_1x1 = BatchNormalization(axis=1, epsilon=0.00001, name='inception_3b_1x1_bn')(X_1x1)
     X_1x1 = Activation('relu')(X_1x1)
 
-    inception = concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
 
 def inception_block_1c(X):
     X_3x3 = fr_utils.conv2d_bn(X,
@@ -99,9 +94,7 @@ def inception_block_1c(X):
     X_pool = MaxPooling2D(pool_size=3, strides=2, data_format='channels_first')(X)
     X_pool = ZeroPadding2D(padding=((0, 1), (0, 1)), data_format='channels_first')(X_pool)
 
-    inception = concatenate([X_3x3, X_5x5, X_pool], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_5x5, X_pool], axis=1)
 
 def inception_block_2a(X):
     X_3x3 = fr_utils.conv2d_bn(X,
@@ -131,9 +124,7 @@ def inception_block_2a(X):
                            layer='inception_4a_1x1',
                            cv1_out=256,
                            cv1_filter=(1, 1))
-    inception = concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_5x5, X_pool, X_1x1], axis=1)
 
 def inception_block_2b(X):
     #inception4e
@@ -153,13 +144,11 @@ def inception_block_2b(X):
                            cv2_filter=(5, 5),
                            cv2_strides=(2, 2),
                            padding=(2, 2))
-    
+
     X_pool = MaxPooling2D(pool_size=3, strides=2, data_format='channels_first')(X)
     X_pool = ZeroPadding2D(padding=((0, 1), (0, 1)), data_format='channels_first')(X_pool)
 
-    inception = concatenate([X_3x3, X_5x5, X_pool], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_5x5, X_pool], axis=1)
 
 def inception_block_3a(X):
     X_3x3 = fr_utils.conv2d_bn(X,
@@ -181,9 +170,7 @@ def inception_block_3a(X):
                            cv1_out=256,
                            cv1_filter=(1, 1))
 
-    inception = concatenate([X_3x3, X_pool, X_1x1], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_pool, X_1x1], axis=1)
 
 def inception_block_3b(X):
     X_3x3 = fr_utils.conv2d_bn(X,
@@ -205,9 +192,7 @@ def inception_block_3b(X):
                            layer='inception_5b_1x1',
                            cv1_out=256,
                            cv1_filter=(1, 1))
-    inception = concatenate([X_3x3, X_pool, X_1x1], axis=1)
-
-    return inception
+    return concatenate([X_3x3, X_pool, X_1x1], axis=1)
 
 def faceRecoModel(input_shape):
     """
@@ -225,21 +210,21 @@ def faceRecoModel(input_shape):
 
     # Zero-Padding
     X = ZeroPadding2D((3, 3))(X_input)
-    
+
     # First Block
     X = Conv2D(64, (7, 7), strides = (2, 2), name = 'conv1')(X)
     X = BatchNormalization(axis = 1, name = 'bn1')(X)
     X = Activation('relu')(X)
-    
+
     # Zero-Padding + MAXPOOL
     X = ZeroPadding2D((1, 1))(X)
     X = MaxPooling2D((3, 3), strides = 2)(X)
-    
+
     # Second Block
     X = Conv2D(64, (1, 1), strides = (1, 1), name = 'conv2')(X)
     X = BatchNormalization(axis = 1, epsilon=0.00001, name = 'bn2')(X)
     X = Activation('relu')(X)
-    
+
     # Zero-Padding + MAXPOOL
     X = ZeroPadding2D((1, 1))(X)
 
@@ -247,33 +232,30 @@ def faceRecoModel(input_shape):
     X = Conv2D(192, (3, 3), strides = (1, 1), name = 'conv3')(X)
     X = BatchNormalization(axis = 1, epsilon=0.00001, name = 'bn3')(X)
     X = Activation('relu')(X)
-    
+
     # Zero-Padding + MAXPOOL
     X = ZeroPadding2D((1, 1))(X)
     X = MaxPooling2D(pool_size = 3, strides = 2)(X)
-    
+
     # Inception 1: a/b/c
     X = inception_block_1a(X)
     X = inception_block_1b(X)
     X = inception_block_1c(X)
-    
+
     # Inception 2: a/b
     X = inception_block_2a(X)
     X = inception_block_2b(X)
-    
+
     # Inception 3: a/b
     X = inception_block_3a(X)
     X = inception_block_3b(X)
-    
+
     # Top layer
     X = AveragePooling2D(pool_size=(3, 3), strides=(1, 1), data_format='channels_first')(X)
     X = Flatten()(X)
     X = Dense(128, name='dense_layer')(X)
-    
+
     # L2 normalization
     X = Lambda(lambda  x: K.l2_normalize(x,axis=1))(X)
 
-    # Create model instance
-    model = Model(inputs = X_input, outputs = X, name='FaceRecoModel')
-        
-    return model
+    return Model(inputs = X_input, outputs = X, name='FaceRecoModel')

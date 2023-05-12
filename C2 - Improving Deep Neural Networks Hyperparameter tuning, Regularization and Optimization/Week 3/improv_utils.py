@@ -131,7 +131,7 @@ def initialize_parameters():
     """
     
     tf.set_random_seed(1)                              # so that your "random" numbers match ours
-        
+
     ### START CODE HERE ### (approx. 6 lines of code)
     W1 = tf.get_variable("W1", [25,12288], initializer = tf.contrib.layers.xavier_initializer(seed = 1))
     b1 = tf.get_variable("b1", [25,1], initializer = tf.zeros_initializer())
@@ -139,16 +139,7 @@ def initialize_parameters():
     b2 = tf.get_variable("b2", [12,1], initializer = tf.zeros_initializer())
     W3 = tf.get_variable("W3", [6,12], initializer = tf.contrib.layers.xavier_initializer(seed = 1))
     b3 = tf.get_variable("b3", [6,1], initializer = tf.zeros_initializer())
-    ### END CODE HERE ###
-
-    parameters = {"W1": W1,
-                  "b1": b1,
-                  "W2": W2,
-                  "b2": b2,
-                  "W3": W3,
-                  "b3": b3}
-    
-    return parameters
+    return {"W1": W1, "b1": b1, "W2": W2, "b2": b2, "W3": W3, "b3": b3}
 
 
 def compute_cost(z3, Y):
@@ -166,12 +157,10 @@ def compute_cost(z3, Y):
     # to fit the tensorflow requirement for tf.nn.softmax_cross_entropy_with_logits()
     logits = tf.transpose(z3)
     labels = tf.transpose(Y)
-    
-    ### START CODE HERE ### (1 line of code)
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = labels))
-    ### END CODE HERE ###
-    
-    return cost
+
+    return tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+    )
 
 
 
@@ -204,7 +193,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
     (n_x, m) = X_train.shape                          # (n_x: input size, m : number of examples in the train set)
     n_y = Y_train.shape[0]                                  # n_y : output size
     costs = []                                        # To keep track of the cost
-    
+
     # Create Placeholders of shape (n_x, n_y)
     ### START CODE HERE ### (1 line)
     X, Y = create_placeholders(n_x, n_y)
@@ -214,22 +203,22 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
     ### START CODE HERE ### (1 line)
     parameters = initialize_parameters()
     ### END CODE HERE ###
-    
+
     # Forward propagation: Build the forward propagation in the tensorflow graph
     ### START CODE HERE ### (1 line)
     z3 = forward_propagation(X, parameters)
     ### END CODE HERE ###
-    
+
     # Cost function: Add cost function to tensorflow graph
     ### START CODE HERE ### (1 line)
     cost = compute_cost(z3, Y)
     ### END CODE HERE ###
-    
+
     # Backpropagation: Define the tensorflow optimizer. Use an AdamOptimizer.
     ### START CODE HERE ### (1 line)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
     ### END CODE HERE ###
-    
+
     # Initialize all the variables
     init = tf.global_variables_initializer()
 
@@ -238,7 +227,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
         
         # Run the initialization
         sess.run(init)
-        
+
         # Do the training loop
         for epoch in range(num_epochs):
 
@@ -251,13 +240,13 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
 
                 # Select a minibatch
                 (minibatch_X, minibatch_Y) = minibatch
-                
+
                 # IMPORTANT: The line that runs the graph on a minibatch.
                 # Run the session to execute the optimizer and the cost, the feedict should contain a minibatch for (X,Y).
                 ### START CODE HERE ### (1 line)
                 _ , temp_cost = sess.run([optimizer, cost], feed_dict={X: minibatch_X, Y: minibatch_Y})
                 ### END CODE HERE ###
-                
+
                 minibatch_cost += temp_cost / num_minibatches
 
             # Print the cost every epoch
@@ -265,12 +254,12 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
                 print ("Cost after epoch %i: %f" % (epoch, minibatch_cost))
             if print_cost == True and epoch % 5 == 0:
                 costs.append(minibatch_cost)
-                
+
         # plot the cost
         plt.plot(np.squeeze(costs))
         plt.ylabel('cost')
         plt.xlabel('iterations (per tens)')
-        plt.title("Learning rate =" + str(learning_rate))
+        plt.title(f"Learning rate ={str(learning_rate)}")
         plt.show()
 
         # lets save the parameters in a variable
@@ -285,5 +274,5 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate = 0.0001,
 
         print ("Train Accuracy:", accuracy.eval({X: X_train, Y: Y_train}))
         print ("Test Accuracy:", accuracy.eval({X: X_test, Y: Y_test}))
-        
+
         return parameters

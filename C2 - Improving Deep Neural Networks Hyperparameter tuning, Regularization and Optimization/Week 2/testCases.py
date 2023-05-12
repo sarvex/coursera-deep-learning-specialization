@@ -39,8 +39,7 @@ def initialize_velocity_test_case():
     b1 = np.random.randn(2,1)
     W2 = np.random.randn(3,3)
     b2 = np.random.randn(3,1)
-    parameters = {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
-    return parameters
+    return {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
 
 def update_parameters_with_momentum_test_case():
     np.random.seed(1)
@@ -70,8 +69,7 @@ def initialize_adam_test_case():
     b1 = np.random.randn(2,1)
     W2 = np.random.randn(3,3)
     b2 = np.random.randn(3,1)
-    parameters = {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
-    return parameters
+    return {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
 
 def update_parameters_with_adam_test_case():
     np.random.seed(1)

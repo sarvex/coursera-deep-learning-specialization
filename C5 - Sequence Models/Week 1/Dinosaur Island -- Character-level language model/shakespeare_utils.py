@@ -71,8 +71,7 @@ def sample(preds, temperature=1.0):
     exp_preds = np.exp(preds)
     preds = exp_preds / np.sum(exp_preds)
     probas = np.random.multinomial(1, preds, 1)
-    out = np.random.choice(range(len(chars)), p = probas.ravel())
-    return out
+    return np.random.choice(range(len(chars)), p = probas.ravel())
     #return np.argmax(probas)
     
 def on_epoch_end(epoch, logs):
@@ -113,21 +112,22 @@ def on_epoch_end(epoch, logs):
         
     # Stop at the end of a line (4 lines)
     print()
- """   
-print("Loading text data...")
+ """
+
+   print("Loading text data...")
 text = io.open('shakespeare.txt', encoding='utf-8').read().lower()
 #print('corpus length:', len(text))
 
 Tx = 40
 chars = sorted(list(set(text)))
-char_indices = dict((c, i) for i, c in enumerate(chars))
-indices_char = dict((i, c) for i, c in enumerate(chars))
+char_indices = {c: i for i, c in enumerate(chars)}
+indices_char = dict(enumerate(chars))
 #print('number of unique characters in the corpus:', len(chars))
 
 print("Creating training set...")
 X, Y = build_data(text, Tx, stride = 3)
 print("Vectorizing training set...")
-x, y = vectorization(X, Y, n_x = len(chars), char_indices = char_indices) 
+x, y = vectorization(X, Y, n_x = len(chars), char_indices = char_indices)
 print("Loading model...")
 model = load_model('models/model_shakespeare_kiank_350_epoch.h5')
 
@@ -141,10 +141,9 @@ def generate_output():
     sentence = ('{0:0>' + str(Tx) + '}').format(usr_input).lower()
     generated += usr_input 
 
-    sys.stdout.write("\n\nHere is your poem: \n\n") 
+    sys.stdout.write("\n\nHere is your poem: \n\n")
     sys.stdout.write(usr_input)
-    for i in range(400):
-
+    for _ in range(400):
         x_pred = np.zeros((1, Tx, len(chars)))
 
         for t, char in enumerate(sentence):

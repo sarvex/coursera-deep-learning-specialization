@@ -30,7 +30,8 @@ def maybe_download(filename, url, expected_bytes):
     else:
         print(statinfo.st_size)
         raise Exception(
-            'Failed to verify ' + filename + '. Can you get to it with a browser?')
+            f'Failed to verify {filename}. Can you get to it with a browser?'
+        )
     return filename
 
 
@@ -46,10 +47,10 @@ def build_dataset(words, n_words):
     """Process raw inputs into a dataset."""
     count = [['UNK', -1]]
     count.extend(collections.Counter(words).most_common(n_words - 1))
-    dictionary = dict()
+    dictionary = {}
     for word, _ in count:
         dictionary[word] = len(dictionary)
-    data = list()
+    data = []
     unk_count = 0
     for word in words:
         if word in dictionary:
@@ -74,15 +75,15 @@ def collect_data(vocabulary_size=10000):
 
 class SimilarityCallback:
     def run_sim(self):
+        top_k = 8  # number of nearest neighbors
         for i in range(valid_size):
             valid_word = reverse_dictionary[valid_examples[i]]
-            top_k = 8  # number of nearest neighbors
             sim = self._get_sim(valid_examples[i])
             nearest = (-sim).argsort()[1:top_k + 1]
-            log_str = 'Nearest to %s:' % valid_word
+            log_str = f'Nearest to {valid_word}:'
             for k in range(top_k):
                 close_word = reverse_dictionary[nearest[k]]
-                log_str = '%s %s,' % (log_str, close_word)
+                log_str = f'{log_str} {close_word},'
             print(log_str)
 
     @staticmethod
@@ -121,9 +122,7 @@ def relu(x):
     Return:
     s -- relu(x)
     """
-    s = np.maximum(0,x)
-    
-    return s
+    return np.maximum(0,x)
 
 
 def initialize_parameters(vocab_size, n_h):
@@ -140,9 +139,8 @@ def initialize_parameters(vocab_size, n_h):
     """
     
     np.random.seed(3)
-    parameters = {}
+    parameters = {'W1': np.random.randn(n_h, vocab_size) / np.sqrt(vocab_size)}
 
-    parameters['W1'] = np.random.randn(n_h, vocab_size) / np.sqrt(vocab_size)
     parameters['b1'] = np.zeros((n_h, 1))
     parameters['W2'] = np.random.randn(vocab_size, n_h) / np.sqrt(n_h)
     parameters['b2'] = np.zeros((vocab_size, 1))

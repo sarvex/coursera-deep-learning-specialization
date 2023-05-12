@@ -298,8 +298,7 @@ def yolo(inputs, anchors, num_classes):
     """Generate a complete YOLO_v2 localization model."""
     num_anchors = len(anchors)
     body = yolo_body(inputs, num_anchors, num_classes)
-    outputs = yolo_head(body.output, anchors, num_classes)
-    return outputs
+    return yolo_head(body.output, anchors, num_classes)
 
 
 def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold=.6):
@@ -391,13 +390,14 @@ def preprocess_true_boxes(true_boxes, anchors, image_size):
     for box in true_boxes:
         # scale box to convolutional feature spatial dimensions
         box_class = box[4:5]
-        box = box[0:4] * np.array(
-            [conv_width, conv_height, conv_width, conv_height])
+        box = box[:4] * np.array(
+            [conv_width, conv_height, conv_width, conv_height]
+        )
         i = np.floor(box[1]).astype('int')
         j = min(np.floor(box[0]).astype('int'),1)
         best_iou = 0
         best_anchor = 0
-                
+
         for k, anchor in enumerate(anchors):
             # Find IOU between box shifted to origin and anchor box.
             box_maxes = box[2:4] / 2.
@@ -415,7 +415,7 @@ def preprocess_true_boxes(true_boxes, anchors, image_size):
             if iou > best_iou:
                 best_iou = iou
                 best_anchor = k
-                
+
         if best_iou > 0:
             detectors_mask[i, j, best_anchor] = 1
             adjusted_box = np.array(

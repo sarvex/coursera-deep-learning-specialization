@@ -46,17 +46,33 @@ def conv2d_bn(x,
               cv2_filter=(3, 3),
               cv2_strides=(1, 1),
               padding=None):
-    num = '' if cv2_out == None else '1'
-    tensor = Conv2D(cv1_out, cv1_filter, strides=cv1_strides, data_format='channels_first', name=layer+'_conv'+num)(x)
-    tensor = BatchNormalization(axis=1, epsilon=0.00001, name=layer+'_bn'+num)(tensor)
+    num = '' if cv2_out is None else '1'
+    tensor = Conv2D(
+        cv1_out,
+        cv1_filter,
+        strides=cv1_strides,
+        data_format='channels_first',
+        name=f'{layer}_conv{num}',
+    )(x)
+    tensor = BatchNormalization(
+        axis=1, epsilon=0.00001, name=f'{layer}_bn{num}'
+    )(tensor)
     tensor = Activation('relu')(tensor)
-    if padding == None:
+    if padding is None:
         return tensor
     tensor = ZeroPadding2D(padding=padding, data_format='channels_first')(tensor)
-    if cv2_out == None:
+    if cv2_out is None:
         return tensor
-    tensor = Conv2D(cv2_out, cv2_filter, strides=cv2_strides, data_format='channels_first', name=layer+'_conv'+'2')(tensor)
-    tensor = BatchNormalization(axis=1, epsilon=0.00001, name=layer+'_bn'+'2')(tensor)
+    tensor = Conv2D(
+        cv2_out,
+        cv2_filter,
+        strides=cv2_strides,
+        data_format='channels_first',
+        name=f'{layer}_conv2',
+    )(tensor)
+    tensor = BatchNormalization(axis=1, epsilon=0.00001, name=f'{layer}_bn2')(
+        tensor
+    )
     tensor = Activation('relu')(tensor)
     return tensor
 
@@ -143,30 +159,27 @@ def load_weights():
     # Set weights path
     dirPath = './weights'
     fileNames = filter(lambda f: not f.startswith('.'), os.listdir(dirPath))
-    paths = {}
     weights_dict = {}
 
-    for n in fileNames:
-        paths[n.replace('.csv', '')] = dirPath + '/' + n
-
+    paths = {n.replace('.csv', ''): f'{dirPath}/{n}' for n in fileNames}
     for name in WEIGHTS:
         if 'conv' in name:
-            conv_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
+            conv_w = genfromtxt(paths[f'{name}_w'], delimiter=',', dtype=None)
             conv_w = np.reshape(conv_w, conv_shape[name])
             conv_w = np.transpose(conv_w, (2, 3, 1, 0))
-            conv_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
-            weights_dict[name] = [conv_w, conv_b]     
+            conv_b = genfromtxt(paths[f'{name}_b'], delimiter=',', dtype=None)
+            weights_dict[name] = [conv_w, conv_b]
         elif 'bn' in name:
-            bn_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
-            bn_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
-            bn_m = genfromtxt(paths[name + '_m'], delimiter=',', dtype=None)
-            bn_v = genfromtxt(paths[name + '_v'], delimiter=',', dtype=None)
+            bn_w = genfromtxt(paths[f'{name}_w'], delimiter=',', dtype=None)
+            bn_b = genfromtxt(paths[f'{name}_b'], delimiter=',', dtype=None)
+            bn_m = genfromtxt(paths[f'{name}_m'], delimiter=',', dtype=None)
+            bn_v = genfromtxt(paths[f'{name}_v'], delimiter=',', dtype=None)
             weights_dict[name] = [bn_w, bn_b, bn_m, bn_v]
         elif 'dense' in name:
-            dense_w = genfromtxt(dirPath+'/dense_w.csv', delimiter=',', dtype=None)
+            dense_w = genfromtxt(f'{dirPath}/dense_w.csv', delimiter=',', dtype=None)
             dense_w = np.reshape(dense_w, (128, 736))
             dense_w = np.transpose(dense_w, (1, 0))
-            dense_b = genfromtxt(dirPath+'/dense_b.csv', delimiter=',', dtype=None)
+            dense_b = genfromtxt(f'{dirPath}/dense_b.csv', delimiter=',', dtype=None)
             weights_dict[name] = [dense_w, dense_b]
 
     return weights_dict
@@ -193,5 +206,4 @@ def img_to_encoding(image_path, model):
     img = img1[...,::-1]
     img = np.around(np.transpose(img, (2,0,1))/255.0, decimals=12)
     x_train = np.array([img])
-    embedding = model.predict_on_batch(x_train)
-    return embedding
+    return model.predict_on_batch(x_train)

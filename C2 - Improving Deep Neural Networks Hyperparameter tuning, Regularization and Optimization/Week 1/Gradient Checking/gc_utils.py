@@ -10,8 +10,7 @@ def sigmoid(x):
     Return:
     s -- sigmoid(x)
     """
-    s = 1/(1+np.exp(-x))
-    return s
+    return 1/(1+np.exp(-x))
 
 def relu(x):
     """
@@ -23,9 +22,7 @@ def relu(x):
     Return:
     s -- relu(x)
     """
-    s = np.maximum(0,x)
-    
-    return s
+    return np.maximum(0,x)
 
 def dictionary_to_vector(parameters):
     """
@@ -51,8 +48,7 @@ def vector_to_dictionary(theta):
     """
     Unroll all our parameters dictionary from a single vector satisfying our specific required shape.
     """
-    parameters = {}
-    parameters["W1"] = theta[:20].reshape((5,4))
+    parameters = {"W1": theta[:20].reshape((5,4))}
     parameters["b1"] = theta[20:25].reshape((5,1))
     parameters["W2"] = theta[25:40].reshape((3,5))
     parameters["b2"] = theta[40:43].reshape((3,1))

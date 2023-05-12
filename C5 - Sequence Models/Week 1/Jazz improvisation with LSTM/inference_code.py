@@ -15,7 +15,7 @@ def inference_model(LSTM_cell, densor, n_x = 78, n_a = 64, Ty = 100):
     
     # Define the input of your model with a shape 
     x0 = Input(shape=(1, n_x))
-    
+
     # Define s0, initial hidden state for the decoder LSTM
     a0 = Input(shape=(n_a,), name='a0')
     c0 = Input(shape=(n_a,), name='c0')
@@ -26,27 +26,22 @@ def inference_model(LSTM_cell, densor, n_x = 78, n_a = 64, Ty = 100):
     ### START CODE HERE ###
     # Step 1: Create an empty list of "outputs" to later store your predicted values (≈1 line)
     outputs = []
-    
+
     # Step 2: Loop over Ty and generate a value at every time step
-    for t in range(Ty):
-        
+    for _ in range(Ty):
         # Step 2.A: Perform one step of LSTM_cell (≈1 line)
         a, _, c = LSTM_cell(x, initial_state=[a, c])
-        
+
         # Step 2.B: Apply Dense layer to the hidden state output of the LSTM_cell (≈1 line)
         out = densor(a)
 
         # Step 2.C: Append the prediction "out" to "outputs" (≈1 line)
         outputs.append(out)
-        
+
         # Step 2.D: Set the prediction "out" to be the next input "x". You will need to use RepeatVector(1). (≈1 line)
         x = RepeatVector(1)(out)
-        
-    # Step 3: Create model instance with the correct "inputs" and "outputs" (≈1 line)
-    inference_model = Model(inputs=[x0, a0, c0], outputs=outputs)
-    ### END CODE HERE ###
-    
-    return inference_model
+
+    return Model(inputs=[x0, a0, c0], outputs=outputs)
 
 
 inference_model = inference_model(LSTM_cell, densor)

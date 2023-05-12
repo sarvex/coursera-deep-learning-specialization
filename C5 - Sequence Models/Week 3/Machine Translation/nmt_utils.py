@@ -68,20 +68,20 @@ def load_dataset(m):
     machine_vocab = set()
     dataset = []
     Tx = 30
-    
 
-    for i in tqdm(range(m)):
+
+    for _ in tqdm(range(m)):
         h, m, _ = load_date()
         if h is not None:
             dataset.append((h, m))
             human_vocab.update(tuple(h))
             machine_vocab.update(tuple(m))
-    
+
     human = dict(zip(sorted(human_vocab) + ['<unk>', '<pad>'], 
                      list(range(len(human_vocab) + 2))))
     inv_machine = dict(enumerate(sorted(machine_vocab)))
     machine = {v:k for k,v in inv_machine.items()}
- 
+
     return dataset, human, machine, inv_machine
 
 def preprocess_data(dataset, human_vocab, machine_vocab, Tx, Ty):
@@ -138,8 +138,7 @@ def int_to_string(ints, inv_vocab):
     l -- list of characters corresponding to the indexes of ints thanks to the inv_vocab mapping
     """
     
-    l = [inv_vocab[i] for i in ints]
-    return l
+    return [inv_vocab[i] for i in ints]
 
 
 EXAMPLES = ['3 May 1979', '5 Apr 09', '20th February 2016', 'Wed 10 Jul 2007']

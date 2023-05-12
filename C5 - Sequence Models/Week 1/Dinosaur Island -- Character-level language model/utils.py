@@ -10,7 +10,7 @@ def smooth(loss, cur_loss):
 def print_sample(sample_ix, ix_to_char):
     txt = ''.join(ix_to_char[ix] for ix in sample_ix)
     txt = txt[0].upper() + txt[1:]  # capitalize first character 
-    print ('%s' % (txt, ), end='')
+    print(f'{txt}', end='')
 
 def get_initial_loss(vocab_size, seq_length):
     return -np.log(1.0/vocab_size)*seq_length
@@ -37,10 +37,8 @@ def initialize_parameters(n_a, n_x, n_y):
     Wya = np.random.randn(n_y, n_a)*0.01 # hidden to output
     b = np.zeros((n_a, 1)) # hidden bias
     by = np.zeros((n_y, 1)) # output bias
-    
-    parameters = {"Wax": Wax, "Waa": Waa, "Wya": Wya, "b": b,"by": by}
-    
-    return parameters
+
+    return {"Wax": Wax, "Waa": Waa, "Wya": Wya, "b": b,"by": by}
 
 def rnn_step_forward(parameters, a_prev, x):
     
